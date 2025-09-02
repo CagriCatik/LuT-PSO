@@ -42,9 +42,9 @@ elseif isstruct(J_ws) && isfield(J_ws,'signals') && isfield(J_ws.signals,'values
     Jsim = J_ws.signals.values(end);
 elseif isa(J_ws,'Simulink.SimulationData.Dataset')
     el = J_ws.get(1);
-    if isa(el,'timeseries'), Jsim = el.Data(end); else, error('eval_lut_cost:UnsupportedFormat'); end
+    if isa(el,'timeseries'), Jsim = el.Data(end); else, error('eval_lut_cost: UnsupportedFormat'); end
 else
-    error('eval_lut_cost:UnsupportedFormat');
+    error('eval_lut_cost: UnsupportedFormat');
 end
 
 % 6) penalties

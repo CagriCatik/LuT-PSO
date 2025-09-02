@@ -1,5 +1,6 @@
 function [bestX, bestJ, histJ] = pso_optimize_lut(x0, opt, pso)
-% Handwritten PSO for LUT vectors.
+
+% PSO for LUT vectors.
 % x0     : column vector initial guess (TBL(:))
 % opt    : struct for eval_lut_cost (mdl, tblSize, bounds, lambda_mon, lambda_smooth)
 % pso    : optional struct fields: nSwarm, maxIter, w, c1, c2, display

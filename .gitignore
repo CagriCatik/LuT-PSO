@@ -1,0 +1,58 @@
+# ===== OS-specific =====
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+# Windows
+Thumbs.db
+Desktop.ini
+
+# ===== MATLAB / Simulink autosave and backups =====
+*.asv
+*.autosave
+*.slx.autosave
+*.mdl.autosave
+*~
+*.bak
+*.tmp
+*.old
+
+# ===== MATLAB compiled artifacts =====
+# MEX binaries
+*.mexw64
+*.mexa64
+*.mexmaci64
+*.mex
+
+# ===== Simulink caches and build folders =====
+slprj/
+sccprj/
+# Simulation cache files
+*.slxc
+# Rapid Accelerator and misc caches
+simulinkcache.mldatx
+*_rapid_accel_*
+rtw/
+*_rtw/
+*_grt_rtw/
+*_ert_rtw/
+*_sfcn_rtw/
+
+# ===== MATLAB/Simulink code generation =====
+codegen/
+matlabcoder.prj
+polyspace/
+
+# ===== Project-local, machine-specific =====
+pathdef.m
+local/
+work/
+
+# ===== Figures, logs, checkpoints =====
+*.fig
+*.log
+*.checkpoint
+
+# ===== Repo-specific generated model =====
+mdl_lut.slx
