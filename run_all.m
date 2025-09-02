@@ -1,30 +1,56 @@
 % run_optimize_and_verify.m
-% Enhancements: automatically save generated plots to a timestamped folder.
 
 clear; clc;
 rng(1);
+addpath(genpath(pwd));
 
-mdl = 'mdl_lut';
+fprintf('\n=== Run - Optimize - Verify ===\n');
 
-% ----------- Output directory -----------
-timestamp = datestr(now,'yyyymmdd_HHMMSS');
+%%  Output directory 
+timestamp = char(datetime("now", "Format", "yyyyMMdd_HHmmss"));
+
 OUT_DIR = fullfile(pwd, 'artifacts', timestamp);
 if ~exist(OUT_DIR, 'dir')
     mkdir(OUT_DIR);
 end
 
-% ----------- Ensure model exists -----------
+%% Locate, load, and open the model
+mdl = 'mdl_lut';
+
 if ~bdIsLoaded(mdl)
-    if exist([mdl '.slx'],'file') == 2
-        load_system(mdl);
-    elseif exist('build_mdl_lut','file') == 2
-        build_mdl_lut;
-    else
-        error('Model %s not found and build_mdl_lut.m is missing.', mdl);
+
+    % Try on MATLAB path
+    f = which([mdl '.slx']);
+    if isempty(f), f = which([mdl '.mdl']); end
+
+    % If not on path, search under current repo tree
+    if isempty(f)
+        d = dir(fullfile(pwd, '**', [mdl '.slx']));
+        if isempty(d)
+            d = dir(fullfile(pwd, '**', [mdl '.mdl']));
+        end
+        if ~isempty(d)
+            f = fullfile(d(1).folder, d(1).name);
+        end
     end
+
+    if isempty(f)
+        error('Model %s not found on path or under %s.', mdl, pwd);
+    end
+
+    load_system(f);
 end
 
-% ----------- Ensure required workspace vars -----------
+% Open model window (optional)
+try
+    open_system(mdl);
+catch ME
+    warning('Could not open model window: %s', error.message);
+end
+
+
+
+%%  Ensure required workspace vars 
 if ~evalin('base','exist(''STOP_T'',''var'')')
     assignin('base','STOP_T', 10);
 end
@@ -36,26 +62,32 @@ if ~evalin('base','exist(''TBL'',''var'')')
     assignin('base','TBL', zeros(size(BP)));
 end
 
-% ----------- Preferred model settings -----------
-try, set_param(mdl,'FastRestart','on'); catch, end
-try, set_param(mdl,'ReturnWorkspaceOutputs','on'); catch, end
-try, set_param([mdl '/J_to_ws'],'VariableName','J','SaveFormat','Array'); catch, end
+%%  Preferred model settings 
+try set_param(mdl,'FastRestart','on'); catch, end
+try set_param(mdl,'ReturnWorkspaceOutputs','on'); catch, end
+try set_param([mdl '/J_to_ws'],'VariableName','J','SaveFormat','Array'); catch, end
+
+fprintf('\n=== Wait for 2 seconds to open and load the model ===\n');
+
+pause(2)
 
 t_all = tic;
 
-% ----------- PSO -----------
+%%  PSO 
 t_pso = tic;
 if exist('run_pso','file') ~= 2
     error('run_pso.m not found on path.');
 end
-% Capture figures opened before PSO (in case run_pso plots)
+
+%% Capture figures opened before PSO (in case run_pso plots)
 figs_before_pso = findall(0,'Type','figure');
 run_pso;
-% Save any figures created by run_pso
+
+%% Save any figures created by run_pso
 save_new_figures(figs_before_pso, OUT_DIR, 'pso_stage');
 t_pso = toc(t_pso);
 
-% ----------- Final J from sim (for summary) -----------
+%%  Final J from sim (for summary) 
 J_final = NaN;
 try
     simOut = sim(mdl);
@@ -79,7 +111,7 @@ catch
     % ignore
 end
 
-% ----------- Verification -----------
+%%  Verification 
 t_ver = tic;
 verify_called = false;
 verify_names = {'run_verify_and_convergence','verify_and_convergence','run_verification'};
@@ -100,7 +132,7 @@ if ~verify_called
 
     % Reference expression from model, fallback to tanh(2*u)
     refExpr = 'tanh(2*u)';
-    try, refExpr = get_param([mdl '/refFcn'], 'Expr'); catch, end
+    try refExpr = get_param([mdl '/refFcn'], 'Expr'); catch, end
     refFcn = @(u) eval_ref_expr(refExpr, u);
     vec_ref = @(x) arrayfun(refFcn, x);
 
@@ -148,7 +180,7 @@ t_ver = toc(t_ver);
 
 t_all = toc(t_all);
 
-% ----------- Summary -----------
+%%  Summary 
 bestJ = NaN;
 if evalin('base','exist(''histJ'',''var'')')
     hj = evalin('base','histJ');
@@ -163,7 +195,7 @@ fprintf('Total time          : %.3f s\n', t_all);
 if ~isnan(bestJ), fprintf('Best J (PSO)        : %.6g\n', bestJ); end
 if ~isnan(J_final), fprintf('Final J (simulate)  : %.6g\n', J_final); end
 
-% ============================ Local functions ============================
+%% Local functions
 function y = eval_ref_expr(expr, u)
 try
     y = eval(expr); % expression uses variable u
@@ -176,8 +208,8 @@ catch
 end
 end
 
+%% Save as .png and .fig; try exportgraphics first, fallback to print/saveas.
 function save_plot(figHandle, basePath)
-% Save as .png and .fig; try exportgraphics first, fallback to print/saveas.
 pngPath = [basePath '.png'];
 figPath = [basePath '.fig'];
 try
@@ -197,8 +229,8 @@ catch
 end
 end
 
+%% Save figures that were created after a given checkpoint.
 function save_new_figures(figs_before, out_dir, prefix)
-% Save figures that were created after a given checkpoint.
 figs_after = findall(0,'Type','figure');
 new_figs = setdiff(figs_after, figs_before);
 if isempty(new_figs), return; end
@@ -217,8 +249,8 @@ for i = 1:numel(new_figs)
 end
 end
 
+%% Replace non-filename characters with underscores.
 function s = sanitize_filename(nameStr)
-% Replace non-filename characters with underscores.
 s = regexprep(nameStr,'[^a-zA-Z0-9_-]','_');
 s = regexprep(s,'_+','_');
 end

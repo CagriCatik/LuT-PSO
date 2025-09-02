@@ -1,9 +1,9 @@
 function run_pso()
-% Optimize the LUT with PSO (self-initializing).
+%% Optimize the LUT with PSO (self-initializing).
 
 mdl = 'mdl_lut';
 
-% ---------- Ensure model exists and is loaded ----------
+%%  Ensure model exists and is loaded 
 if ~bdIsLoaded(mdl)
     if exist([mdl '.slx'],'file') == 2
         load_system(mdl);
@@ -15,7 +15,7 @@ if ~bdIsLoaded(mdl)
     end
 end
 
-% ---------- Ensure required workspace variables ----------
+%%  Ensure required workspace variables 
 if ~evalin('base','exist(''STOP_T'',''var'')')
     assignin('base','STOP_T', 10);
 end
@@ -33,38 +33,38 @@ else
     end
 end
 
-% ---------- Model sink settings and fast loop ----------
+%%  Model sink settings and fast loop 
 try set_param([mdl '/J_to_ws'], 'VariableName','J', 'SaveFormat','Array'); catch, end
 try set_param(mdl,'FastRestart','on'); catch, end
 try set_param(mdl,'ReturnWorkspaceOutputs','on'); catch, end
 
-% ---------- Cost options ----------
+%%  Cost options 
 opt.mdl = mdl;
 opt.tblSize = size(evalin('base','TBL'));
 opt.bounds = [-2, 2];
 opt.lambda_mon = 0;
 opt.lambda_smooth = 1e-2;
 
-% ---------- PSO params ----------
-pso.nSwarm  = 25;
+%%  PSO params 
+pso.nSwarm  = 50;
 pso.maxIter = 80;
 pso.w  = 0.7;
 pso.c1 = 1.6;
 pso.c2 = 1.6;
 pso.display = 'iter';
 
-% ---------- Initial vector ----------
+%%  Initial vector 
 x0 = evalin('base','TBL(:)');
 
-% ---------- Run PSO ----------
+%%  Run PSO 
 [bestX, bestJ, histJ] = pso_optimize_lut(x0, opt, pso);
 assignin('base','histJ', histJ);
 
-% ---------- Apply best table ----------
+%%  Apply best table 
 TBL_best = reshape(bestX, opt.tblSize);
 assignin('base','TBL', TBL_best);
 
-% ---------- Final check ----------
+%%  Final check 
 simOut = sim(opt.mdl);
 J_final = NaN;
 if isa(simOut,'Simulink.SimulationOutput') && any(strcmp(who(simOut),'J'))

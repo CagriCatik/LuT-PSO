@@ -3,7 +3,7 @@
 
 clear; clc;
 
-% ----- Base variables -----
+%%  Base variables 
 STOP_T = 10;
 BP     = linspace(-1,1,11);
 TBL    = zeros(size(BP));
@@ -12,7 +12,7 @@ assignin('base','STOP_T',STOP_T);
 assignin('base','BP',BP);
 assignin('base','TBL',TBL);
 
-% ----- Ensure model exists and is loaded -----
+%%  Ensure model exists and is loaded 
 mdl = 'mdl_lut';
 if ~bdIsLoaded(mdl)
     if exist([mdl '.slx'],'file') == 2
@@ -24,15 +24,15 @@ if ~bdIsLoaded(mdl)
     end
 end
 
-% ----- Model I/O settings -----
-try, set_param([mdl '/J_to_ws'],'VariableName','J','SaveFormat','Array'); catch, end
-try, set_param(mdl,'ReturnWorkspaceOutputs','on'); catch, end
-try, set_param(mdl,'FastRestart','on'); catch, end
+%%  Model I/O settings 
+try set_param([mdl '/J_to_ws'],'VariableName','J','SaveFormat','Array'); catch, end
+try set_param(mdl,'ReturnWorkspaceOutputs','on'); catch, end
+try set_param(mdl,'FastRestart','on'); catch, end
 
-% ----- Simulate once -----
+%%  Simulate once 
 simOut = sim(mdl);
 
-% Extract J
+%% Extract J
 J_final = NaN;
 if isa(simOut,'Simulink.SimulationOutput') && any(strcmp(who(simOut),'J'))
     Jv = simOut.get('J');
@@ -52,10 +52,11 @@ elseif isa(Jv,'Simulink.SimulationData.Dataset')
 end
 fprintf('Simulation J: %.6g\n', J_final);
 
-% ----- Verification: LUT vs reference -----
+%% Verification: LUT vs reference 
+
 % Read the reference expression from the Fcn block, fallback to tanh(2*u)
 refExpr = 'tanh(2*u)';
-try, refExpr = get_param([mdl '/refFcn'],'Expr'); catch, end
+try refExpr = get_param([mdl '/refFcn'],'Expr'); catch, end
 refFcn  = @(u) eval_ref_expr(refExpr, u);
 vec_ref = @(x) arrayfun(refFcn, x);
 
@@ -84,7 +85,7 @@ legend('y_ref(u)','y_lut(u)','Location','best');
 grid on; xlabel('u'); ylabel('y');
 title('Static Sweep Comparison');
 
-% ----- Local function -----
+%%  Local function 
 function y = eval_ref_expr(expr, u)
 try
     y = eval(expr); % expression uses variable "u"

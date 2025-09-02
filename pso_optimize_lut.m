@@ -1,11 +1,11 @@
 function [bestX, bestJ, histJ] = pso_optimize_lut(x0, opt, pso)
 
-% PSO for LUT vectors.
+%% PSO for LUT vectors.
 % x0     : column vector initial guess (TBL(:))
 % opt    : struct for eval_lut_cost (mdl, tblSize, bounds, lambda_mon, lambda_smooth)
 % pso    : optional struct fields: nSwarm, maxIter, w, c1, c2, display
 
-% ----- defaults -----
+%  defaults 
 if nargin < 3, pso = struct; end
 if ~isfield(pso,'nSwarm'),  pso.nSwarm  = 25; end
 if ~isfield(pso,'maxIter'), pso.maxIter = 60; end
@@ -19,7 +19,7 @@ rng(1); % reproducible
 x0 = x0(:);
 nVar = numel(x0);
 
-% ----- bounds -----
+%%  bounds 
 if isfield(opt,'bounds') && ~isempty(opt.bounds)
     lb = opt.bounds(1)*ones(nVar,1);
     ub = opt.bounds(2)*ones(nVar,1);
@@ -28,11 +28,11 @@ else
     ub =  inf(nVar,1);
 end
 
-% ----- swarm init -----
+%%  swarm init 
 X = repmat(x0.', pso.nSwarm, 1);          % nSwarm x nVar
 V = zeros(pso.nSwarm, nVar);
 
-% jitter around x0; robust to infinite bounds
+%% jitter around x0; robust to infinite bounds
 spanRow = (ub - lb).';                     % 1 x nVar
 spanRow(~isfinite(spanRow)) = 1;           % fallback scale
 jitter = 0.2 .* randn(pso.nSwarm, nVar) .* repmat(spanRow, pso.nSwarm, 1);
@@ -47,7 +47,7 @@ pbestJ = inf(pso.nSwarm,1);
 bestJ = inf;                               % global best cost
 bestX = x0;                                % global best position (column)
 
-% ----- evaluate initial swarm -----
+%%  evaluate initial swarm 
 for i = 1:pso.nSwarm
     Ji = eval_lut_cost(pbestX(i,:).', opt);
     pbestJ(i) = Ji;
@@ -62,7 +62,7 @@ if strcmpi(pso.display,'iter')
     fprintf('Iter %3d | Best J: %.6g\n', 1, bestJ);
 end
 
-% ----- main loop -----
+%%  main loop 
 for it = 2:pso.maxIter
     for i = 1:pso.nSwarm
         r1 = rand(1,nVar);
