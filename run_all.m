@@ -4,12 +4,13 @@ clear; clc;
 rng(1);
 addpath(genpath(pwd));
 
-fprintf('\n=== Run - Optimize - Verify ===\n');
+fprintf('=== Run - Optimize - Verify ===');
 
 %%  Output directory 
 timestamp = char(datetime("now", "Format", "yyyyMMdd_HHmmss"));
 
 OUT_DIR = fullfile(pwd, 'artifacts', timestamp);
+
 if ~exist(OUT_DIR, 'dir')
     mkdir(OUT_DIR);
 end
@@ -41,7 +42,7 @@ if ~bdIsLoaded(mdl)
     load_system(f);
 end
 
-% Open model window (optional)
+%% Open model window (optional)
 try
     open_system(mdl);
 catch ME
@@ -160,21 +161,6 @@ if ~verify_called
     legend('y_ref(u)','y_lut(u)','Location','best');
     grid on; xlabel('u'); ylabel('y'); title('Static Sweep Comparison');
     save_plot(f2, fullfile(OUT_DIR,'static_sweep'));
-
-    % Convergence plot if histJ exists
-    if evalin('base','exist(''histJ'',''var'')')
-        histJ = evalin('base','histJ');
-        it = 1:numel(histJ);
-        f3 = figure('Name','PSO Convergence','NumberTitle','off');
-        semilogy(it, histJ, '-o', 'LineWidth', 1.5, 'MarkerSize', 4);
-        grid on; xlim([1 numel(histJ)]);
-        xlabel('Iteration'); ylabel('Best J (semilogy)');
-        title('PSO Convergence: Best-so-far Cost');
-        text(it(end), histJ(end), sprintf('  bestJ=%.3g', histJ(end)), 'VerticalAlignment','middle');
-        save_plot(f3, fullfile(OUT_DIR,'pso_convergence'));
-    else
-        fprintf('Note: histJ not found in base workspace. Add assignin(''base'',''histJ'', histJ) in run_pso.\n');
-    end
 end
 t_ver = toc(t_ver);
 
@@ -192,6 +178,7 @@ fprintf('Artifacts dir       : %s\n', OUT_DIR);
 fprintf('PSO time            : %.3f s\n', t_pso);
 fprintf('Verification time   : %.3f s\n', t_ver);
 fprintf('Total time          : %.3f s\n', t_all);
+
 if ~isnan(bestJ), fprintf('Best J (PSO)        : %.6g\n', bestJ); end
 if ~isnan(J_final), fprintf('Final J (simulate)  : %.6g\n', J_final); end
 

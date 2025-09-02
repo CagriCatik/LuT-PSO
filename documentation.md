@@ -2,7 +2,8 @@
 
 ## 1. Overview
 
-This package builds a Simulink model and optimizes a 1-D Lookup Table (LUT) so the LUT output tracks a target behavior with minimal mean-squared error (MSE). A handwritten Particle Swarm Optimization (PSO) algorithm updates the LUT table values, runs the simulation, and minimizes the scalar cost exported from the model.
+This package builds a Simulink model and optimizes a 1-D Lookup Table (LUT) so the LUT output tracks a target behavior with minimal mean-squared error (MSE). 
+A Particle Swarm Optimization (PSO) algorithm updates the LUT table values, runs the simulation, and minimizes the scalar cost exported from the model.
 
 Primary goal: minimize
 
@@ -31,54 +32,7 @@ where `y_ref(t)` is a reference mapping of the input signal and `y_lut(t)` is th
 * `run_pso.m`
   Driver that configures options and PSO parameters, runs the optimization, applies the best LUT back to the workspace, and prints final metrics.
 
-## 3. Prerequisites
 
-* MATLAB and Simulink installed.
-* Simulink blocks used: Sine Wave, Fcn, 1-D Lookup Table, Sum, Math Function (square), Integrator, Product, To Workspace.
-* No external toolboxes required beyond Simulink.
-
-\[Unverified] Exact parameter names and block masks can vary slightly by release. The scripts use only widely supported parameters.
-
-## 4. Quickstart
-
-1. Build the model.
-
-```matlab
-build_mdl_lut
-open_system('mdl_lut')    % optional
-```
-
-2. Smoke-test the cost function with the current LUT.
-
-```matlab
-opt.mdl = 'mdl_lut';
-opt.tblSize = size(evalin('base','TBL'));
-opt.bounds = [-2, 2];
-opt.lambda_mon = 0;
-opt.lambda_smooth = 1e-2;
-
-x0 = evalin('base','TBL(:)');
-J0 = eval_lut_cost(x0, opt);
-disp(['Baseline J: ' num2str(J0)]);
-```
-
-3. Run PSO.
-
-```matlab
-run_pso
-```
-
-4. Inspect results and validate.
-
-```matlab
-BP   = evalin('base','BP');
-TBL  = evalin('base','TBL');
-uu   = linspace(min(BP), max(BP), 1000);
-y_ref = tanh(2*uu);
-y_lut = interp1(BP, TBL, uu, 'linear', 'extrap');
-mse_grid = mean((y_ref - y_lut).^2);
-fprintf('Grid MSE (static): %.6g\n', mse_grid);
-```
 
 ## 5. Model Architecture
 
