@@ -1,6 +1,6 @@
 # Simulink LUT Optimization with PSO
 
-End-to-end optimization of a 1-D lookup table in a Simulink model using a Particle Swarm Optimization, with verification plots and artifact export.
+This project provides an end-to-end workflow for optimizing a 1-D lookup table (LUT) in Simulink using a custom Particle Swarm Optimization (PSO) algorithm. It automates model setup, cost evaluation, optimization, and verification while exporting artifacts for reproducibility. The framework supports any Simulink model that outputs a scalar cost, with default configurations for breakpoints, table values, and reference functions. Key features include penalty terms for monotonicity and smoothness, early stopping for convergence, reproducible results with fixed seeds, and visualization of performance through plots and summaries. The modular structure separates responsibilities across setup, optimization, evaluation, and result management, making it extensible to higher-dimensional LUTs.
 
 ---
 
