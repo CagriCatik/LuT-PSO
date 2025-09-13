@@ -4,6 +4,7 @@
 .AppleDouble
 .LSOverride
 Icon?
+
 # Windows
 Thumbs.db
 Desktop.ini
@@ -53,6 +54,9 @@ work/
 *.fig
 *.log
 *.checkpoint
+*.txt
+*.html
+*.xml
 
 # ===== Repo-specific generated model =====
-mdl_lut.slx
+mdl_lut.slxc
