@@ -3,7 +3,8 @@ function [bestX, bestJ, histJ] = pso_optimize_lut(x0, opt, pso)
 %% PSO for LUT vectors.
 % x0     : column vector initial guess (TBL(:))
 % opt    : struct for eval_lut_cost (mdl, tblSize, bounds, lambda_mon, lambda_smooth)
-% pso    : optional struct fields: nSwarm, maxIter, w, c1, c2, display
+% pso    : optional struct fields: nSwarm, maxIter, w, c1, c2, display,
+%          tolFun, stallIter
 
 %  defaults 
 if nargin < 3, pso = struct; end
@@ -13,6 +14,8 @@ if ~isfield(pso,'w'),       pso.w       = 0.7; end
 if ~isfield(pso,'c1'),      pso.c1      = 1.6; end
 if ~isfield(pso,'c2'),      pso.c2      = 1.6; end
 if ~isfield(pso,'display'), pso.display = 'iter'; end
+if ~isfield(pso,'tolFun'),      pso.tolFun      = 1e-6; end
+if ~isfield(pso,'stallIter'),   pso.stallIter   = 10;   end
 
 rng(1); % reproducible
 
@@ -62,6 +65,10 @@ if strcmpi(pso.display,'iter')
     fprintf('Iter %3d | Best J: %.6g\n', 1, bestJ);
 end
 
+stallCount = 0;
+prevBestJ  = bestJ;
+lastIt     = 1;
+
 %%  main loop 
 for it = 2:pso.maxIter
     for i = 1:pso.nSwarm
@@ -92,7 +99,23 @@ for it = 2:pso.maxIter
     if strcmpi(pso.display,'iter')
         fprintf('Iter %3d | Best J: %.6g\n', it, bestJ);
     end
+
+    if abs(prevBestJ - bestJ) < pso.tolFun
+        stallCount = stallCount + 1;
+    else
+        stallCount = 0;
+    end
+    prevBestJ = bestJ;
+    lastIt = it;
+
+    if stallCount >= pso.stallIter
+        if strcmpi(pso.display,'iter')
+            fprintf('Stopping early after %d stagnant iterations.\n', stallCount);
+        end
+        break;
+    end
 end
 
+histJ = histJ(1:lastIt);
 bestX = bestX(:);                           % ensure column
 end

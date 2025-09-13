@@ -52,6 +52,8 @@ pso.w  = 0.7;
 pso.c1 = 1.6;
 pso.c2 = 1.6;
 pso.display = 'iter';
+pso.tolFun    = 1e-6;   % improvement threshold for early stop
+pso.stallIter = 10;     % iterations allowed with no significant improvement
 
 %%  Initial vector 
 x0 = evalin('base','TBL(:)');

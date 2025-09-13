@@ -156,6 +156,8 @@ pso.nSwarm  = 25;
 pso.maxIter = 60;
 pso.w  = 0.7; pso.c1 = 1.6; pso.c2 = 1.6;
 pso.display = 'iter';     % or 'off'
+pso.tolFun    = 1e-6;     % early stop tolerance on best J improvement
+pso.stallIter = 10;       % number of stagnant iterations before stop
 ```
 
 * Reference function: change `Expr` in `build_mdl_lut.m`:
