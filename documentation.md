@@ -31,6 +31,10 @@ where `y_ref(t)` is a reference mapping of the input signal and `y_lut(t)` is th
 
 * `run_pso.m`
   Driver that configures options and PSO parameters, runs the optimization, applies the best LUT back to the workspace, and prints final metrics.
+* `run_all.m`
+  Runs optimization and verification, saving all figures.
+* `verify_lut.m`
+  Plots breakpoint fit, static sweep, and PSO convergence.
 
 
 

@@ -26,6 +26,10 @@ y_ref(u) = tanh(2*u)
   Handwritten PSO that minimizes `J` by perturbing LUT values.
 * `run_pso.m`
   Driver that configures options and PSO parameters, runs PSO, applies best LUT, and prints final metrics.
+* `run_all.m`
+  High-level pipeline that runs optimization and verification, saving figures.
+* `verify_lut.m`
+  Verifies the optimized LUT and plots PSO convergence.
 
 ## Requirements
 
